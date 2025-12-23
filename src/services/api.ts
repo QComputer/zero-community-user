@@ -174,8 +174,8 @@ export interface Order {
  * Matches backend standardization with proper error handling and response processing
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-const API_DOCS_URL = import.meta.env.VITE_API_DOCS_URL || 'http://localhost:3000/api-docs';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sefr.runflare.run/api/v1';
+const API_DOCS_URL = import.meta.env.VITE_API_DOCS_URL || 'https://sefr.runflare.run/api-docs';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
