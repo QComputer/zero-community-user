@@ -19,8 +19,6 @@ const PublicCatalog: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [statusMain, setStatusMain] = useState<string>('online');
   const [statusCustom, setStatusCustom] = useState<string>('');
-  const [showShareSection, setShowShareSection] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
   const { getTotalItems } = useCart();
 
   useEffect(() => {
@@ -65,19 +63,6 @@ const PublicCatalog: React.FC = () => {
   };
 
   // Cart is now managed by useCart hook - no need for separate cart loading
-
-  const copyShareLink = async () => {
-    if (catalog?.shareLink) {
-      try {
-        await navigator.clipboard.writeText(catalog.shareLink);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
-      } catch (error) {
-        console.error('Failed to copy link:', error);
-      }
-    }
-  };
-
 
   if (loading) {
     return (
@@ -150,68 +135,6 @@ const PublicCatalog: React.FC = () => {
           )}
         </Button>
       </div>
-
-      {/* Share Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Share2 className="h-5 w-5" />
-              {t('common.share')}
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowShareSection(!showShareSection)}
-            >
-              <QrCode className="h-4 w-4 mr-2" />
-              {showShareSection ? t('common.hide') : t('common.show')}
-            </Button>
-          </div>
-        </CardHeader>
-        {showShareSection && (
-          <CardContent className="space-y-4">
-            {/* Share Link */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t('common.share')}</label>
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                <input
-                  type="text"
-                  value={catalog?.shareLink || ''}
-                  readOnly
-                  className="flex-1 bg-transparent border-none outline-none text-sm"
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={copyShareLink}
-                  className="shrink-0"
-                >
-                  <Copy className="h-4 w-4" />
-                  {copySuccess ? t('common.copied') : t('common.copy')}
-                </Button>
-              </div>
-            </div>
-
-            {/* QR Code */}
-            {catalog?.qrCode && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">{t('page.account.qrCode')}</label>
-                <div className="flex justify-center p-4 bg-white rounded-lg border">
-                  <img
-                    src={catalog.qrCode}
-                    alt="QR Code"
-                    className="w-32 h-32"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  {t('page.catalogs.scanToAccess')}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        )}
-      </Card>
 
       {/* Menu Grid */}
       <StoreMenu storeId={catalog.owner?._id} catalogId={catalog._id}/>
