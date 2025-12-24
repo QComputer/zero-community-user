@@ -1,4 +1,4 @@
-import axios from 'axios';
+ntinurimport axios from 'axios';
 import { logApiCall, logError } from './logger';
 
 /**
@@ -41,7 +41,10 @@ export interface CartItem {
 }
 export interface Cart {
   _id: string;
-  user: User;
+  user?: User; // Optional for guest carts
+  sessionId?: string; // Present for guest carts
+  sessionType?: 'guest'; // Present for guest carts
+  isGuestCart?: boolean; // Present for guest carts
   items: CartItem[];
   expiresAt: string;
   createdAt: string;

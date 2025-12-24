@@ -52,6 +52,14 @@ export const useCart = () => {
       const cartData = cartsResponse?.data || null;
 
       console.log('Carts data received:', cartData);
+
+      // Handle guest cart session tracking
+      if (cartData && cartData.isGuestCart && cartData.sessionId) {
+        console.log('Guest cart detected, session ID:', cartData.sessionId);
+        // Store session ID in localStorage for persistence across page reloads
+        localStorage.setItem('guest_session_id', cartData.sessionId);
+      }
+
       // Set the carts data as-is, maintaining store separation
       loadStoreCarts(cartData);
       setCart(cartData);
@@ -198,7 +206,11 @@ export const useCart = () => {
 
       // Refresh cart to get updated data with proper structure
       await loadCart();
-      toast.success(`Cart updated successfully`);
+
+      // Show appropriate success message based on cart type
+      const isGuestCart = cart && cart.isGuestCart;
+      const message = isGuestCart ? 'Item added to cart (guest session)' : 'Cart updated successfully';
+      toast.success(message);
 
     } catch (error: any) {
       console.error('Failed to update cart:', error);
