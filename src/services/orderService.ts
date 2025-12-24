@@ -454,7 +454,7 @@ export class OrderService {
  * Order Workflow Helper - State machine for order processing
  */
 export class OrderWorkflow {
-  static getNextActions(order: Order, userRole: string): string[] {
+  static getNextActions(order: any, userRole: string): string[] {
     const actions: string[] = [];
 
     if (userRole === 'store') {
@@ -466,16 +466,29 @@ export class OrderWorkflow {
                    'adjust_prepare_-1', 'adjust_prepare_-3', 'adjust_prepare_-5');
       }
     } else if (userRole === 'driver') {
-      if (order.status === 'prepared' && order.isTakeout) {
+      // Check if this is an available order (no driver assigned yet)
+      const isAvailableOrder = !order.driver && order.stateGiven === 'by-store';
+
+      if (isAvailableOrder && order.isTakeout) {
         actions.push('accept_driver');
-      } else if (order.status === 'accepted' && order.isTakeout) {
-        actions.push('pickup');
-        actions.push('adjust_pickup_5', 'adjust_pickup_3', 'adjust_pickup_1',
-                   'adjust_pickup_-1', 'adjust_pickup_-3', 'adjust_pickup_-5');
-      } else if (order.status === 'pickedup' && order.isTakeout) {
-        actions.push('deliver');
-        actions.push('adjust_deliver_5', 'adjust_deliver_3', 'adjust_deliver_1',
-                   'adjust_deliver_-1', 'adjust_deliver_-3', 'adjust_deliver_-5');
+      } else if (order.driver && order.isTakeout) {
+        // Show pickup button when order is prepared or accepted-by-driver
+        if (order.status === 'prepared' || order.status === 'accepted-by-driver') {
+          actions.push('pickup');
+        }
+        
+        // Time adjustment section - show for accepted orders (after driver accepts, before pickup)
+        if (order.status === 'accepted' || order.status === 'accepted-by-driver') {
+          actions.push('adjust_pickup_5', 'adjust_pickup_3', 'adjust_pickup_1',
+                     'adjust_pickup_-1', 'adjust_pickup_-3', 'adjust_pickup_-5');
+        }
+
+        // Show deliver button when order is picked up
+        if (order.status === 'pickedup') {
+          actions.push('deliver');
+          actions.push('adjust_deliver_5', 'adjust_deliver_3', 'adjust_deliver_1',
+                     'adjust_deliver_-1', 'adjust_deliver_-3', 'adjust_deliver_-5');
+        }
       }
     } else if (userRole === 'customer') {
       if (['pickedup', 'prepared', 'delivered'].includes(order.status)) {

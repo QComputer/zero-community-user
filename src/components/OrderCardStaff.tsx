@@ -214,26 +214,29 @@ const OrderCardStaff: React.FC<OrderCardStaffProps> = ({ order, user, onUpdate }
             {t('components.orderCard.acceptDelivery')}
           </Button>
         );
-      } else if (order.driver && order.isTakeout && (order.status === 'accepted' || order.status === 'accepted-by-driver' || order.status === 'prepared')) {
-        buttons.push(
-          <Button
-            key="pickup"
-            onClick={() => handleAction('pickup')}
-            disabled={order.status !== 'prepared'}
-            className="w-full mb-3"
-          >
-            <Package className="w-4 h-4 mr-2" />
-            {t('components.orderCard.pickUpOrder')}
-            {order.status !== 'prepared' && (
-              <span className="ml-2 text-xs opacity-75">({t('components.orderCard.waitingForPreparation')})</span>
-            )}
-          </Button>
-        );
+      } else if (order.driver && order.isTakeout) {
+        // Show pickup button when order is prepared or accepted-by-driver
+        if (order.status === 'prepared' || order.status === 'accepted-by-driver') {
+          buttons.push(
+            <Button
+              key="pickup"
+              onClick={() => handleAction('pickup')}
+              disabled={order.status !== 'prepared'}
+              className="w-full mb-3"
+            >
+              <Package className="w-4 h-4 mr-2" />
+              {t('components.orderCard.pickUpOrder')}
+              {order.status !== 'prepared' && (
+                <span className="ml-2 text-xs opacity-75">({t('components.orderCard.waitingForPreparation')})</span>
+              )}
+            </Button>
+          );
+        }
 
-        // Time adjustment section - only show when accepted (after driver accepts, before pickup)
+        // Time adjustment section - show for accepted orders (after driver accepts, before pickup)
         if (order.status === 'accepted' || order.status === 'accepted-by-driver') {
           buttons.push(
-            <div key="time-adjust" className="border-t pt-3">
+            <div key="time-adjust-pickup" className="border-t pt-3">
               <div className="flex items-center text-sm font-medium text-muted-foreground mb-2">
                 <Clock className="w-4 h-4 mr-1" />
                 {t('components.orderCard.adjustPickupTime')}
@@ -242,24 +245,27 @@ const OrderCardStaff: React.FC<OrderCardStaffProps> = ({ order, user, onUpdate }
             </div>
           );
         }
-      } else if (order.status === 'pickedup' && order.isTakeout) {
-        buttons.push(
-          <Button key="deliver" onClick={() => handleAction('deliver')} className="w-full mb-3">
-            <MapPin className="w-4 h-4 mr-2" />
-            {t('components.orderCard.deliverToCustomer')}
-          </Button>
-        );
 
-        // Time adjustment section
-        buttons.push(
-          <div key="time-adjust" className="border-t pt-3">
-            <div className="flex items-center text-sm font-medium text-muted-foreground mb-2">
-              <Clock className="w-4 h-4 mr-1" />
-              {t('components.orderCard.adjustDeliveryTime')}
+        // Show deliver button when order is picked up
+        if (order.status === 'pickedup') {
+          buttons.push(
+            <Button key="deliver" onClick={() => handleAction('deliver')} className="w-full mb-3">
+              <MapPin className="w-4 h-4 mr-2" />
+              {t('components.orderCard.deliverToCustomer')}
+            </Button>
+          );
+
+          // Time adjustment section for delivery
+          buttons.push(
+            <div key="time-adjust-deliver" className="border-t pt-3">
+              <div className="flex items-center text-sm font-medium text-muted-foreground mb-2">
+                <Clock className="w-4 h-4 mr-1" />
+                {t('components.orderCard.adjustDeliveryTime')}
+              </div>
+              {renderTimeAdjustmentButtons('deliver')}
             </div>
-            {renderTimeAdjustmentButtons('deliver')}
-          </div>
-        );
+          );
+        }
       }
     }
 

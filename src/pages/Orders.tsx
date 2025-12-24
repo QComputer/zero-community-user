@@ -21,12 +21,14 @@ const useBatchProgressUpdates = (orders: any[]) => {
     const updateProgress = async () => {
       try {
         const orderIds = orders.map(order => order._id);
-        const progressArray: any = await orderAPI.getOrdersProgress(orderIds);
-        const progressMap: Record<string, any> = {};
-        progressArray.forEach((progress: any) => {
-          progressMap[progress._id] = progress;
-        });
-        setProgressData(progressMap);
+        const response = await orderAPI.getOrdersProgress(orderIds);
+        if (response.success && response.data) {
+          const progressMap: Record<string, any> = {};
+          response.data.forEach((progress: any) => {
+            progressMap[progress._id] = progress;
+          });
+          setProgressData(progressMap);
+        }
       } catch (error) {
         // Silently fail for progress updates
       }
@@ -290,7 +292,16 @@ const Orders: React.FC<OrdersProps> = ({ user }) => {
         <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {displayFilteredOrders.map((order) => {
             // Merge order data with real-time progress data
-            const orderWithProgress = { ...order, ...progressData[order._id] };
+            const progress = progressData[order._id] || {};
+            const orderWithProgress = {
+              ...order,
+              progressPrepare: progress.progressPrepare !== undefined ? progress.progressPrepare : order.progressPrepare || 0,
+              progressPickup: progress.progressPickup !== undefined ? progress.progressPickup : order.progressPickup || 0,
+              progressDeliver: progress.progressDeliver !== undefined ? progress.progressDeliver : order.progressDeliver || 0,
+              minutesLeftPrepare: progress.minutesLeftPrepare !== undefined ? progress.minutesLeftPrepare : order.minutesLeftPrepare,
+              minutesLeftPickup: progress.minutesLeftPickup !== undefined ? progress.minutesLeftPickup : order.minutesLeftPickup,
+              minutesLeftDeliver: progress.minutesLeftDeliver !== undefined ? progress.minutesLeftDeliver : order.minutesLeftDeliver
+            };
 
             if (user?.role === 'customer' || !user || user?.role === 'guest') {
               return (
