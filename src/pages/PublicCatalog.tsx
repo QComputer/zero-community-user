@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { catalogAPI } from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Loader2, ShoppingCart, Share2, Copy, QrCode } from 'lucide-react';
+import { Loader2, ShoppingCart } from 'lucide-react';
 import StoreMenu from '@/components/StoreMenu';
 import ProfileHeader from '../components/ProfileHeader';
 import { Badge } from '../components/ui/badge';
