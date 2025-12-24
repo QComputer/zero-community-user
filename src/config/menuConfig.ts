@@ -1,4 +1,4 @@
-import { Home, Package, FileText, Palette, User as UserIcon, Image as ImageIcon, Menu, BookOpen, Grid2X2 } from 'lucide-react';
+import { Home, Package, FileText, Palette, User as UserIcon, Image as ImageIcon, Menu, BookOpen, Grid2X2, TestTube } from 'lucide-react';
 
 interface MenuItem {
   path: string;
@@ -73,8 +73,12 @@ export const menuItems: MenuItem[] = [
     icon: ImageIcon,
     roles: ['admin'],
   },
-
-
+  {
+    path: '/image-test',
+    label: 'common.imageTest',
+    icon: TestTube,
+    roles: ['admin'],
+  },
 ];
 
 export const filterMenuItems = (userRole: string | undefined, screenSize: 'mobile' | 'desktop' | 'icon' = 'desktop'): MenuItem[] => {

@@ -25,6 +25,7 @@ import CreateCatalog from './pages/CreateCatalog.tsx';
 import PublicCatalogs from './pages/PublicCatalogs.tsx';
 import PublicCatalog from './pages/PublicCatalog.tsx';
 import MenuPage from './pages/MenuPage.tsx';
+import ImageUploadTest from './components/ImageUploadTest.tsx';
 import useFavicon from './hooks/use-favicon.ts';
 
 const App: React.FC = () => {
@@ -122,6 +123,7 @@ const App: React.FC = () => {
               <Route path="/people" element={<People user={user!} />} />
               <Route path="/themes" element={<Themes user={user!} />} />
               <Route path="/images" element={<ImageManagement user={user!} />} />
+              <Route path="/image-test" element={<ImageUploadTest user={user!} />} />
               <Route path="/catalogs" element={<Catalogs />} />
               <Route path="/catalogs/create" element={<CreateCatalog />} />
               <Route path="/public-catalogs" element={<PublicCatalogs />} />
