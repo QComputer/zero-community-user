@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compression Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.6/babel.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .file-input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .image-preview {
+            max-width: 300px;
+            max-height: 300px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel" data-type="module">
+        // Import the compressImage function
+        const compressImage = async (file, targetSizeKB = 500) => {
+            return new Promise((resolve, reject) => {
+                if (file.size <= targetSizeKB * 1024) {
+                    resolve(file);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        if (!ctx) {
+                            reject(new Error('Failed to create canvas context'));
+                            return;
+                        }
+
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        let quality = 0.9;
+                        let compressedBlob = null;
+                        
+                        const compress = () => {
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            canvas.toBlob((blob) => {
+                                if (!blob) {
+                                    reject(new Error('Failed to compress image'));
+                                    return;
+                                }
+                                
+                                if (blob.size <= targetSizeKB * 1024) {
+                                    compressedBlob = blob;
+                                    const compressedFile = new File([compressedBlob], file.name, {
+                                        type: 'image/jpeg',
+                                        lastModified: Date.now(),
+                                    });
+                                    resolve(compressedFile);
+                                } else {
+                                    quality -= 0.1;
+                                    if (quality <= 0.1) {
+                                        if (compressedBlob) {
+                                            const compressedFile = new File([compressedBlob], file.name, {
+                                                type: 'image/jpeg',
+                                                lastModified: Date.now(),
+                                            });
+                                            resolve(compressedFile);
+                                        } else {
+                                            reject(new Error('Failed to compress image to target size'));
+                                        }
+                                    } else {
+                                        canvas.toBlob((newBlob) => {
+                                            if (newBlob) {
+                                                compressedBlob = newBlob;
+                                                compress();
+                                            } else {
+                                                reject(new Error('Failed to compress image'));
+                                            }
+                                        }, 'image/jpeg', quality);
+                                    }
+                                }
+                            }, 'image/jpeg', quality);
+                        };
+                        
+                        compress();
+                    };
+                    img.onerror = () => {
+                        reject(new Error('Failed to load image'));
+                    };
+                    img.src = event.target?.result;
+                };
+                reader.onerror = () => {
+                    reject(new Error('Failed to read file'));
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
+        const App = () => {
+            const [file, setFile] = React.useState(null);
+            const [compressedFile, setCompressedFile] = React.useState(null);
+            const [originalSize, setOriginalSize] = React.useState(0);
+            const [compressedSize, setCompressedSize] = React.useState(0);
+            const [loading, setLoading] = React.useState(false);
+            const [error, setError] = React.useState(null);
+
+            const handleFileChange = async (e) => {
+                const selectedFile = e.target.files[0];
+                if (!selectedFile) return;
+
+                setFile(selectedFile);
+                setOriginalSize(selectedFile.size);
+                setLoading(true);
+                setError(null);
+
+                try {
+                    const compressed = await compressImage(selectedFile, 500);
+                    setCompressedFile(compressed);
+                    setCompressedSize(compressed.size);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="container">
+                    <h1>Image Compression Test</h1>
+                    <p>Upload an image to test the compression functionality. The target size is 500KB.</p>
+                    
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="file-input"
+                    />
+
+                    {loading && <p>Compressing image...</p>}
+                    {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+                    {file && (
+                        <div className="result">
+                            <h3>Original Image</h3>
+                            <p>Name: {file.name}</p>
+                            <p>Type: {file.type}</p>
+                            <p>Size: {(file.size / 1024).toFixed(2)} KB</p>
+                            <img
+                                src={URL.createObjectURL(file)}
+                                alt="Original"
+                                className="image-preview"
+                            />
+                        </div>
+                    )}
+
+                    {compressedFile && (
+                        <div className="result">
+                            <h3>Compressed Image</h3>
+                            <p>Name: {compressedFile.name}</p>
+                            <p>Type: {compressedFile.type}</p>
+                            <p>Size: {(compressedFile.size / 1024).toFixed(2)} KB</p>
+                            <p>Compression Ratio: {((compressedFile.size / file.size) * 100).toFixed(2)}%</p>
+                            <img
+                                src={URL.createObjectURL(compressedFile)}
+                                alt="Compressed"
+                                className="image-preview"
+                            />
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

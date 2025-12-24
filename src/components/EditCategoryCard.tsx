@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { X, Upload, Edit, Trash2 } from 'lucide-react';
+import { compressImageWithToast } from '../utils/imageCompression';
 
 interface EditCategoryCardProps {
   user: any;
@@ -61,15 +62,19 @@ const EditCategoryCard: React.FC<EditCategoryCardProps> = ({
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData(prev => ({ ...prev, image: file }));
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Compress the image before setting it in the form data
+      const compressedFile = await compressImageWithToast(file, 500);
+      if (compressedFile) {
+        setFormData(prev => ({ ...prev, image: compressedFile }));
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+      }
     }
   };
 
