@@ -177,11 +177,19 @@ export interface Order {
  * Matches backend standardization with proper error handling and response processing
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sefr.runflare.run/api/v1';
-const API_DOCS_URL = import.meta.env.VITE_API_DOCS_URL || 'https://sefr.runflare.run/api-docs';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+export const IMAGE_SERVER_URL = import.meta.env.VITE_IMAGE_SERVER_URL || 'http://localhost:3001';
+export const API_DOCS_URL = import.meta.env.VITE_API_DOCS_URL || 'http://localhost:3000/api-docs';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, // 10 seconds timeout
+});
+const imageApi = axios.create({
+  baseURL: IMAGE_SERVER_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -874,9 +882,7 @@ export const imageAPI = {
   downloadBackup: async () => {
     return api.get('/image/backup', {
       responseType: 'blob',
-      headers: {
-        'Accept': 'application/zip'
-      }
+      headers: {'Accept': 'application/zip'}
     });
   },
 
@@ -897,7 +903,15 @@ export const imageAPI = {
     return handleResponse(api.post('/image/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }));
-  }
+  },
+
+  // Direct Upload image 
+  directUpload: async (formData: FormData) => {
+    return handleResponse(imageApi.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }));
+  },
+
 };
 
 

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { imageAPI } from '../services/api';
+import { imageAPI, API_BASE_URL, IMAGE_SERVER_URL } from '../services/api';
 
 interface ImageUploadTestProps {
   user: any;
 }
-
 const ImageUploadTest: React.FC<ImageUploadTestProps> = ({ user }) => {
   const [uploading, setUploading] = useState(false);
   const [testImage, setTestImage] = useState<string | null>(null);
@@ -44,7 +43,7 @@ const ImageUploadTest: React.FC<ImageUploadTestProps> = ({ user }) => {
       console.log('Testing image upload to:', process.env.VITE_API_BASE_URL);
       console.log('Image server URL:', process.env.VITE_IMAGE_SERVER_URL);
 
-      const result = await imageAPI.upload(formData);
+      const result = await imageAPI.directUpload(formData);
       
       setUploadResult(result);
       toast.success('Image upload test successful!');
@@ -63,7 +62,11 @@ const ImageUploadTest: React.FC<ImageUploadTestProps> = ({ user }) => {
       toast.error('Please select an image first');
       return;
     }
-
+    const imageServerUrl = process.env.VITE_IMAGE_SERVER_URL
+    if (!imageServerUrl) {
+      toast.error('No imageServerUrl found. Please insert VITE_IMAGE_SERVER_URL to .env file');
+      return;
+    }
     setUploading(true);
 
     try {
@@ -75,8 +78,9 @@ const ImageUploadTest: React.FC<ImageUploadTestProps> = ({ user }) => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const imageServerUrl = process.env.VITE_IMAGE_SERVER_URL || 'https://sefr-image.runflare.run';
       console.log('Testing direct upload to image server:', imageServerUrl);
+
+      //const result = imageAPI.directUpload(formData);
 
       const result = await fetch(`${imageServerUrl}/upload`, {
         method: 'POST',
@@ -118,11 +122,11 @@ const ImageUploadTest: React.FC<ImageUploadTestProps> = ({ user }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <strong>API Base URL:</strong>
-            <p className="text-sm text-muted-foreground">{process.env.VITE_API_BASE_URL}</p>
+            <p className="text-sm text-muted-foreground">{API_BASE_URL}</p>
           </div>
           <div>
             <strong>Image Server URL:</strong>
-            <p className="text-sm text-muted-foreground">{process.env.VITE_IMAGE_SERVER_URL}</p>
+            <p className="text-sm text-muted-foreground">{IMAGE_SERVER_URL}</p>
           </div>
           <div>
             <strong>User Role:</strong>
