@@ -14,7 +14,7 @@ export interface ApiResponse<T = any> {
 export interface User {
   _id: string;
   username: string;
-  role: 'customer' | 'store' | 'driver' | 'admin' | 'staff' | 'guest';
+  role: 'customer' | 'store' | 'driver' | 'admin' | 'staff';
   name?: string;
   phone?: string;
   email?: string;
@@ -198,14 +198,12 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
       config.headers.token = token; // Keep for backward compatibility
       console.log(`Token added to headers for ${config.method?.toUpperCase()} request`);
-    } else {
-      const session = localStorage.getItem('x-session-id');
-      console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}, session: ${session ? 'PRESENT' : 'MISSING'}`);
-      if (session) {
-        config.headers.Authorization = `Bearer ${token}`;
-        config.headers['x-session-id'] = session; // Keep for backward compatibility
-        console.log(`Session added to headers for ${config.method?.toUpperCase()} request`);
-      }
+    }
+    const sessionId = localStorage.getItem('sessionId');
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}, session: ${session ? 'PRESENT' : 'MISSING'}`);
+    if (sessionId) {
+      config.headers['x-session-id'] = sessionId; // Keep for backward compatibility
+      console.log(`Session added to headers for ${config.method?.toUpperCase()} request`);
     }
 
     // Add API version header
@@ -633,14 +631,6 @@ export const orderAPI = {
     return ApiHelper.post('/order/cancel', data);
   },
 
-  // Guest order endpoints
-  getGuestOrders: async (): Promise<ApiResponse<Order[]>> => {
-    return ApiHelper.get<Order[]>('/order/guest-orders');
-  },
-
-  cancelGuestOrder: async (data: any): Promise<ApiResponse<any>> => {
-    return ApiHelper.post('/order/cancel-guest', data);
-  },
 
   // Payment endpoints
   markOrderAsPaid: async (orderId: string): Promise<ApiResponse<any>> => {
@@ -702,8 +692,8 @@ export const authAPI = {
     return ApiHelper.post<User & { token: string }>('/user/login', { username, password });
   },
 
-  guestLogin: async (): Promise<ApiResponse<User & { token: string }>> => {
-    return ApiHelper.post<User & { token: string }>('/user/guest-login', {});
+  guestLogin: async (isManual: boolean): Promise<ApiResponse<{ sessionId: string }>> => {
+    return ApiHelper.post<{ sessionId: string }>('/user/guest-login', { manualLogin: isManual });
   },
 
   // User account and profile

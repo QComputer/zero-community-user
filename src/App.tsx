@@ -52,8 +52,6 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = (userData: User, token: string) => {
-    // Ensure user object has _id field for consistency
-    //const userWithId = { ...userData, _id: userData.userId || userData._id };
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('userId', userData._id);
@@ -66,6 +64,7 @@ const App: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('sessionId');
     localStorage.removeItem('user');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');

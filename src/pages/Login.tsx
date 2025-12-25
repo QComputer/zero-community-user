@@ -36,7 +36,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       logUserAction('login', { username: formData.username });
       onLogin(res.data.user, res.data.token);
-      //localStorage.setItem('token', res.data.token);
+      //
       //localStorage.setItem('user', JSON.stringify(res.data.user));
       toast.success(t('auth.loginSuccess'));
       navigate('/dashboard');
@@ -53,12 +53,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const res: any = await authAPI.guestLogin();
-
-      logUserAction('guest_login', { username: res.data.user.username });
-      onLogin(res.data.user, res.data.token);
+      // isManual = true
+      const res: any = await authAPI.guestLogin(true);
+      localStorage.setItem('ssessionId', res.data.sessionId);
+      localStorage.removeItem('token');
+      logUserAction('guest_login', { username: res.data.username });
       toast.success(t('auth.loginSuccess'));
-      navigate('/dashboard');
+      navigate('/catalogs');
     } catch (error) {
       const standardized = standardizeError(error);
       logUserAction('guest_login_failed', { error: standardized.message });
