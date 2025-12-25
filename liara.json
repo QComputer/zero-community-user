@@ -1,0 +1,9 @@
+{
+  "port": 3000,
+  "platform": "node",
+  "startCommand": "npm run preview",
+  "buildCommand": "npm run build",
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
