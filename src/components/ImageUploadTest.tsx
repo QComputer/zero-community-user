@@ -75,7 +75,7 @@ const ImageUploadTest: React.FC<ImageUploadTestProps> = ({ user }) => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const imageServerUrl = process.env.VITE_IMAGE_SERVER_URL || 'https://zero-community-image.onrender.com';
+      const imageServerUrl = process.env.VITE_IMAGE_SERVER_URL || 'https://sefr-image.runflare.run';
       console.log('Testing direct upload to image server:', imageServerUrl);
 
       const result = await fetch(`${imageServerUrl}/upload`, {
