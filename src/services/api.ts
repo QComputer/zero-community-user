@@ -468,18 +468,10 @@ export const userAPI = {
   getFavorites: async (userId: string): Promise<ApiResponse<Product[]>> => {
     return ApiHelper.get<Product[]>(`/user/favorites/${userId}`);
   },
+// Image uploads - Simplified to use unified image upload
+// Note: Profile and avatar images can now use the unified image upload endpoint
+// uploadProfileImage and uploadAvatarImage methods removed - use imageAPI.upload() instead
 
-  // Image uploads
-  uploadProfileImage: async (userId: string, formData: FormData) => {
-    return ApiHelper.post(`/user/upload-profile-image/${userId}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-
-  uploadAvatarImage: async (userId: string, formData: FormData) => {
-    return ApiHelper.post(`/user/upload-avatar-image/${userId}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
   }
 };
 
@@ -863,11 +855,21 @@ export const invitationAPI = {
   }
 };
 
-// Image API - Updated with standardized response handling
+// Image API - Simplified with direct Liara disk uploads
 export const imageAPI = {
   // List all images (admin only)
   list: async () => {
     return ApiHelper.get('/image/list');
+  },
+
+  // Check disk health (public endpoint)
+  checkDiskHealth: async () => {
+    return ApiHelper.get('/image/disk/health');
+  },
+
+  // Get disk space information (public endpoint)
+  getDiskSpace: async () => {
+    return ApiHelper.get('/image/disk/space');
   },
 
   // Download image backup (admin only)
@@ -890,12 +892,17 @@ export const imageAPI = {
     return ApiHelper.delete(`/image/${filename}`);
   },
 
-  // Upload image (all users)
+  // Upload image (all users) - Simplified direct upload to Liara disk
   upload: async (formData: FormData) => {
     return handleResponse(api.post('/image/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }));
   },
+
+  // Clear all images (admin only)
+  clearAll: async () => {
+    return ApiHelper.delete('/image/clear');
+  }
 
 };
 
