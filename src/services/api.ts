@@ -468,12 +468,11 @@ export const userAPI = {
   getFavorites: async (userId: string): Promise<ApiResponse<Product[]>> => {
     return ApiHelper.get<Product[]>(`/user/favorites/${userId}`);
   },
-// Image uploads - Simplified to use unified image upload
-// Note: Profile and avatar images can now use the unified image upload endpoint
-// uploadProfileImage and uploadAvatarImage methods removed - use imageAPI.upload() instead
+  // Image uploads - Simplified to use unified image upload
+  // Note: Profile and avatar images can now use the unified image upload endpoint
+  // uploadProfileImage and uploadAvatarImage methods removed - use imageAPI.upload() instead
 
-  }
-};
+}
 
 // Product API - Updated with standardized response handling
 export const productAPI = {
@@ -633,26 +632,26 @@ export const orderAPI = {
   cancelOrder: async (data: any): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/cancel', data);
   },
- 
+
   // Guest order endpoints
   getGuestOrders: async (): Promise<ApiResponse<Order[]>> => {
     return ApiHelper.get<Order[]>('/order/guest-orders');
   },
- 
+
   cancelGuestOrder: async (data: any): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/cancel-guest', data);
   },
- 
+
   // Payment endpoints
   markOrderAsPaid: async (orderId: string): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/mark-paid', { orderId });
   },
- 
+
   markOrderAsUnpaid: async (orderId: string): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/mark-unpaid', { orderId });
   },
-/*
-  */
+  /*
+    */
 };
 
 // Cart API - Unified approach for all user types (guest and authenticated)
@@ -663,7 +662,7 @@ export const cartAPI = {
   },
 
   addToCart: async (productId: string, quantity: number, catalogId: string): Promise<any> => {
-    return ApiHelper.post('/cart/', { productId, quantity , catalogId});
+    return ApiHelper.post('/cart/', { productId, quantity, catalogId });
   },
 
   removeFromCart: async (productId: string): Promise<any> => {
@@ -876,7 +875,7 @@ export const imageAPI = {
   downloadBackup: async () => {
     return api.get('/image/backup', {
       responseType: 'blob',
-      headers: {'Accept': 'application/zip'}
+      headers: { 'Accept': 'application/zip' }
     });
   },
 
