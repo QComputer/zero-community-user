@@ -16,16 +16,6 @@ export interface StoreCart {
 }
 
 /**
- * Get the appropriate cart API based on authentication status
- * Uses unified approach - backend handles session management automatically
- */
-const getCartAPI = () => {
-  // Unified approach: use cartAPI for all user types
-  // Backend handles session management automatically
-  return cartAPI;
-};
-
-/**
  * Custom hook for managing cart state and operations
  */
 export const useCart = () => {
@@ -43,7 +33,7 @@ export const useCart = () => {
       setError(null);
 
       console.log('Loading cart data...');
-      const cartAPI = getCartAPI();
+      //const cartAPI = getCartAPI();
       const cartsResponse = await cartAPI.get();
       if (!cartsResponse.success) {
         throw new Error(cartsResponse.message || 'Failed to load cart');
@@ -161,7 +151,7 @@ export const useCart = () => {
     try {
       console.log(`handleAddToCart called: productId=${productId}, storeId=${storeId}, quantityChange=${quantityChange}, catalogId=${catalogId}`);
 
-      const cartAPI = getCartAPI();
+      //const cartAPI = getCartAPI();
 
       // Unified approach: backend handles session management automatically
       // No need to check authentication status - all valid sessions are authenticated
@@ -267,7 +257,7 @@ export const useCart = () => {
    */
   const clearCart = async () => {
     try {
-      const cartAPI = getCartAPI();
+      //const cartAPI = getCartAPI();
 
       // Unified approach: remove items individually for all user types
       const allProductIds: string[] = [];
@@ -298,7 +288,7 @@ export const useCart = () => {
    */
   const clearStoreCart = async (storeId: string) => {
     try {
-      const cartAPI = getCartAPI();
+      //const cartAPI = getCartAPI();
       const cart = storeCarts.find(c => c.storeId === storeId);
       if (!cart) return;
 

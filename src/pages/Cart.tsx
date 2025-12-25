@@ -174,12 +174,13 @@ const MyCart: React.FC<CartProps> = ({ user }) => {
   const placeGuestOrder = async (storeCart: StoreCart) => {
     try {
       setPlacingOrder(storeCart.storeId);
-
+      
       const orderData = {
         storeId: storeCart.storeId,
         items: storeCart.items.map(item => ({
           productId: item.product._id,
           productName: item.product.name,
+          catalogId: item.catalog._id,
           quantity: item.quantity,
         })),
         deliveryAddress: isTakeout ? address : undefined,

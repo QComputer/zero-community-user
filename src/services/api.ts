@@ -81,7 +81,7 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
 }
-export interface CategoryDesign {
+export interface CatalogDesign {
   colorScheme?: {
     primary?: string;
     secondary?: string;
@@ -100,7 +100,7 @@ export interface Catalog {
   store: User;
   description?: string;
   products: Product[];
-  design: CategoryDesign;
+  design: CatalogDesign;
   isPublic: boolean;
   isActive: boolean;
   createdAt: string;
@@ -188,7 +188,7 @@ const api = axios.create({
   timeout: 10000, // 10 seconds timeout
 });
 
-// Request interceptor to add auth token and handle API versioning
+// Request interceptor to add auth token or gust session and handle API versioning
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -199,7 +199,13 @@ api.interceptors.request.use(
       config.headers.token = token; // Keep for backward compatibility
       console.log(`Token added to headers for ${config.method?.toUpperCase()} request`);
     } else {
-      console.log(`No token found for ${config.method?.toUpperCase()} request`);
+      const session = localStorage.getItem('x-session-id');
+      console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}, session: ${session ? 'PRESENT' : 'MISSING'}`);
+      if (session) {
+        config.headers.Authorization = `Bearer ${token}`;
+        config.headers['x-session-id'] = session; // Keep for backward compatibility
+        console.log(`Session added to headers for ${config.method?.toUpperCase()} request`);
+      }
     }
 
     // Add API version header
@@ -357,7 +363,7 @@ export function getApiDocsUrl(): string {
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
-  return !!localStorage.getItem('token');
+  return !!localStorage.getItem('token') || !!localStorage.getItem('session')
 }
 
 /**
@@ -381,11 +387,6 @@ export const userAPI = {
 
   login: async (username: string, password: string): Promise<ApiResponse<User & { token: string }>> => {
     return ApiHelper.post<User & { token: string }>('/user/login', { username, password });
-  },
-
-  // getAll method
-  getAll: async (): Promise<ApiResponse<User[]>> => {
-    return ApiHelper.get<User[]>('/user/all');
   },
 
   // User account and profile
@@ -434,7 +435,7 @@ export const userAPI = {
   },
 
   // User management
-  getAllUsers: async (): Promise<ApiResponse<User[]>> => {
+  getAll: async (): Promise<ApiResponse<User[]>> => {
     return ApiHelper.get<User[]>('/user/all');
   },
 
@@ -632,7 +633,6 @@ export const orderAPI = {
     return ApiHelper.post<any[]>('/order/progress-batch', { orderIds });
   },
 
-
   // Feedback
   addFeedback: async (data: { orderId: string; rating?: number; comment?: string; reactions?: string[] }): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/feedback', data);
@@ -641,34 +641,26 @@ export const orderAPI = {
   cancelOrder: async (data: any): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/cancel', data);
   },
-
+ 
+  // Guest order endpoints
+  getGuestOrders: async (): Promise<ApiResponse<Order[]>> => {
+    return ApiHelper.get<Order[]>('/order/guest-orders');
+  },
+ 
+  cancelGuestOrder: async (data: any): Promise<ApiResponse<any>> => {
+    return ApiHelper.post('/order/cancel-guest', data);
+  },
+ 
   // Payment endpoints
   markOrderAsPaid: async (orderId: string): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/mark-paid', { orderId });
   },
-
+ 
   markOrderAsUnpaid: async (orderId: string): Promise<ApiResponse<any>> => {
     return ApiHelper.post('/order/mark-unpaid', { orderId });
   },
-
-  // Guest order operations
-  getGuestOrders: async (): Promise<ApiResponse<any[]>> => {
-    const sessionId = getGuestSessionId();
-    const headers = sessionId ? { 'x-session-id': sessionId } : {};
-    return ApiHelper.get<any[]>('/order/user-orders', undefined, { headers });
-  },
-
-  cancelGuestOrder: async (orderId: string): Promise<ApiResponse<any>> => {
-    const sessionId = getGuestSessionId();
-    const headers = sessionId ? { 'x-session-id': sessionId } : {};
-    return ApiHelper.post('/order/cancel', { orderId }, { headers });
-  },
-
-  getGuestOrderProgress: async (orderId: string): Promise<ApiResponse<any>> => {
-    const sessionId = getGuestSessionId();
-    const headers = sessionId ? { 'x-session-id': sessionId } : {};
-    return ApiHelper.get(`/order/progress/${orderId}`, undefined, { headers });
-  }
+/*
+  */
 };
 
 // Cart API - Unified approach for all user types (guest and authenticated)
@@ -704,19 +696,6 @@ export const cartAPI = {
   }
 };
 
-// Helper function to get guest session ID from cookie
-// This is now legacy - unified authentication handles session management automatically
-function getGuestSessionId(): string | null {
-  // Get session ID from cookie (set by backend autoGuestLogin middleware)
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    const [name, value] = cookie.trim().split('=');
-    if (name === 'guest_session') {
-      return value;
-    }
-  }
-  return null;
-}
 
 // Auth API - Updated with standardized response handling
 export const authAPI = {
