@@ -34,13 +34,13 @@ const Categories: React.FC<CategoriesProps> = ({ user }) => {
 
   const loadCategories = async () => {
     try {
-      console.log('Loading categories for user role:', user.role);
+      console.log('Loading categories for user role:', user?.role);
       const response = await categoryAPI.list();
       if (response.success && response.data) {
         console.log('All categories loaded:', response.data.length);
         // Categories are already filtered by the backend based on user role
         // Stores get their own + global categories, admins get all categories
-        console.log('Categories loaded for user role:', user.role, 'count:', response.data.length);
+        console.log('Categories loaded for user role:', user?.role, 'count:', response.data.length);
         setCategories(response.data as any[]);
       }
     } catch (error: any) {

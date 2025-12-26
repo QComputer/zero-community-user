@@ -387,7 +387,7 @@ const Navigation: React.FC<NavigationProps> = ({ user, onLogout, onStatusChange 
           )}
         </div>
         <div className="flex items-center justify-end  space-x-2 lg:space-x-5">
-          {(user?.role === 'customer' || user?.role === 'guest') && (
+          {(user?.role === 'customer' || !user) && (
             <Button
               variant="ghost"
               size="sm"
@@ -402,14 +402,14 @@ const Navigation: React.FC<NavigationProps> = ({ user, onLogout, onStatusChange 
               )}
             </Button>
           )}
-          {(user?.role === 'store' || user?.role === 'admin' || user?.role === 'guest' || user?.role === 'customer' || user?.role === 'driver') && (
+          {(user?.role === 'store' || user?.role === 'admin' || user?.role === 'driver' || !user) && (
             <Button
               variant="ghost"
               className="relative h-10 w-10 rounded-full hover:bg-accent transition-colors"
               onClick={() => { handleNavigation('/orders'); navigate('/orders'); }}
             >
               <ClipboardList className="h-8 w-8" />
-              {user.role === 'store' ? (
+              {user?.role === 'store' ? (
                 <>
                   {placedOrders > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full text-black text-xs flex items-center justify-center p-0" style={{ backgroundColor: 'var(--order-status-placed)' }}>
@@ -422,7 +422,7 @@ const Navigation: React.FC<NavigationProps> = ({ user, onLogout, onStatusChange 
                     </Badge>
                   )}
                 </>
-              ) : user.role === 'driver' ? (
+              ) : user?.role === 'driver' ? (
                 <>
                   {pendingOrders > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-orange-500 text-black text-xs flex items-center justify-center p-0">

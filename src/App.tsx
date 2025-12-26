@@ -31,7 +31,9 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const initialLocation = useRef(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | undefined>(undefined);
+  const [user, setUser] = useState<User | null>(null);
+  //const [userRole, setUserRole] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   useFavicon(user?.role);
 
@@ -41,35 +43,56 @@ const App: React.FC = () => {
     if (token && userData) {
       const parsedUser = JSON.parse(userData);
       // Ensure user object has _id field for consistency
-      const userWithId = { ...parsedUser, _id: parsedUser.userId || parsedUser._id };
+      const userWithId = { ...parsedUser, _id: parsedUser.userId || parsedUser._id, role: parsedUser.userRole };
       setIsAuthenticated(true);
       setUser(userWithId);
       // Navigate back to initial location if it was an authenticated route
       if (initialLocation.current !== '/login' && initialLocation.current !== '/register' && !initialLocation.current.startsWith('/public')) {
         navigate(initialLocation.current);
       }
+    } else {
+      const _sessionId = localStorage.getItem('sessionId');
+      if (_sessionId) setSessionId(_sessionId);
     }
   }, []);
 
-  const handleLogin = (userData: User, token: string) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('userId', userData._id);
-    localStorage.setItem('userRole', userData.role);
-    setIsAuthenticated(true);
-    setUser(userData);
-    console.log(JSON.stringify(userData));
-
+  const handleLogin = (userDataOrNull: User | null, tokenOrSessionId: any) => {
+    if (userDataOrNull) {
+      localStorage.setItem('token', tokenOrSessionId);
+      localStorage.setItem('user', JSON.stringify(userDataOrNull));
+      localStorage.setItem('userId', userDataOrNull._id);
+      localStorage.setItem('userRole', userDataOrNull.role);
+      localStorage.removeItem('sessionId');
+      setUser(userDataOrNull);
+      console.log(JSON.stringify(userDataOrNull));
+      setIsAuthenticated(true);
+    } else if (tokenOrSessionId) {
+      localStorage.setItem('sessionId', tokenOrSessionId);
+      localStorage.setItem('userRole', 'guest');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('userId');
+      setIsAuthenticated(true);
+    } else {
+      localStorage.setItem('userRole', 'unknown');
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+    }
   };
 
   const handleLogout = () => {
+    const token = localStorage.getItem('token');
+
+    console.log('Loging out sessionId:', sessionId, ' -- token:', token)
     localStorage.removeItem('token');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('user');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
     setIsAuthenticated(false);
-    setUser(undefined);
+    setUser(null);
+    setSessionId(null);
   };
 
   const handleStatusChange = (newStatus: string) => {
@@ -95,24 +118,24 @@ const App: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Routes>
           {/* Public routes - accessible without authentication */}
-          <Route path="/public/profile/:targetUserId" element={<Public />} />
-          <Route path="/cart" element={<MyCart user={user} />} />
+          <Route path="/cart" element={<MyCart user={user!} />} />
           <Route path="/catalog/public/:catalogId" element={<PublicCatalog />} />
-          <Route path="/orders" element={<Orders user={user} />} />
+          <Route path="/orders" element={<Orders user={user!} />} />
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
           {!isAuthenticated ? (
             <>
-              <Route path="/catalogs" element={<PublicCatalogs />} />
-              <Route path="/login" element={<Login onLogin={handleLogin} />} />
               <Route path="/register" element={<Register onLogin={handleLogin} />} />
               <Route path="*" element={<Navigate to="/login" />} />
+              <Route path="/catalogs" element={<PublicCatalogs />} />
             </>
           ) : (
             <>
               <Route path="/dashboard" element={<Dashboard user={user!} />} />
               <Route path="/account" element={<Account user={user!} onUserUpdate={handleUserUpdate} />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/public/catalog/:catalogId" element={<PublicCatalog />} />
+              <Route path="/catalogs" element={<Catalogs />} />
+              <Route path="/public/profile/:targetUserId" element={<Public />} />
 
               <Route path="/products" element={<Products user={user!} />} />
               <Route path="/categories" element={<Categories user={user!} />} />
@@ -123,7 +146,6 @@ const App: React.FC = () => {
               <Route path="/images" element={<ImageManagement user={user!} />} />
               <Route path="/catalogs" element={<Catalogs />} />
               <Route path="/catalogs/create" element={<CreateCatalog />} />
-              <Route path="/public-catalogs" element={<PublicCatalogs />} />
               <Route path="/menu" element={<MenuPage user={user!} />} />
               <Route path="*" element={<Navigate to="/dashboard" />} />
             </>

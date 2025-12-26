@@ -33,7 +33,6 @@ export const useCart = () => {
       setError(null);
 
       console.log('Loading cart data...');
-      //const cartAPI = getCartAPI();
       const cartsResponse = await cartAPI.get();
       if (!cartsResponse.success) {
         throw new Error(cartsResponse.message || 'Failed to load cart');

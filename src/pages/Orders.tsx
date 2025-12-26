@@ -47,12 +47,12 @@ const useBatchProgressUpdates = (orders: any[]) => {
 };
 
 interface OrdersProps {
-  user: any;
+  user: any | null | undefined;
 }
 
 const Orders: React.FC<OrdersProps> = ({ user }) => {
-    const { t } = useTranslation();
-  
+  const { t } = useTranslation();
+
   const [orders, setOrders] = useState<any[]>([]);
   const [availableOrders, setAvailableOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,7 +154,7 @@ const Orders: React.FC<OrdersProps> = ({ user }) => {
         let matchesCustomer = false;
         if (user?.role !== 'customer') {
           matchesCustomer = order.user?.name?.toLowerCase().includes(searchTerm) ||
-                            order.user?.username?.toLowerCase().includes(searchTerm);
+            order.user?.username?.toLowerCase().includes(searchTerm);
         }
 
         if (!matchesOrderId && !matchesOrderName && !matchesCustomer) {
@@ -164,7 +164,7 @@ const Orders: React.FC<OrdersProps> = ({ user }) => {
 
       return true;
     });
-  }, [displayOrders, filters, user?.role]);
+  }, [displayOrders, filters, user]);
 
   const handleFiltersChange = (newFilters: OrderFiltersType) => {
     setFilters(newFilters);
@@ -177,7 +177,7 @@ const Orders: React.FC<OrdersProps> = ({ user }) => {
   const loadOrders = async () => {
     try {
       let ordersData: any;
-      if (user?.role === 'customer') {
+      if (user?.role === 'customer' || !user) {
         const response = await orderAPI.getUserOrders();
         ordersData = Array.isArray(response) ? response : (response?.data || []);
       } else if (user?.role === 'store') {
@@ -196,10 +196,6 @@ const Orders: React.FC<OrdersProps> = ({ user }) => {
         return;
       } else if (user?.role === 'admin') {
         const response = await orderAPI.getAllOrders();
-        ordersData = Array.isArray(response) ? response : (response?.data || []);
-      } else if (!user || user?.role === 'guest') {
-        // Handle guest users
-        const response = await orderAPI.getGuestOrders();
         ordersData = Array.isArray(response) ? response : (response?.data || []);
       }
 

@@ -22,6 +22,14 @@ interface ProductsProps {
 
 const Products: React.FC<ProductsProps> = ({ user }) => {
   const { t } = useTranslation();
+
+  if (!user || user === undefined || user === null) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 space-y-4">
+        <p className="text-destructive font-medium text-foreground">{t('common.accesDenied')}</p>
+      </div>
+    );
+  }
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { storeCarts, handleAddToCart, getCartItemCount } = useCart();
@@ -120,6 +128,7 @@ const Products: React.FC<ProductsProps> = ({ user }) => {
   };
 
   // Cart is managed by the useCart hook
+  
   const loadFavorites = async () => {
     try {
       const favoriteProducts: any = await userAPI.getFavorites(user._id);

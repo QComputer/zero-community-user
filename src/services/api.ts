@@ -177,8 +177,8 @@ export interface Order {
  * Matches backend standardization with proper error handling and response processing
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sefr-backend.liara.run/api/v1';
-export const API_DOCS_URL = import.meta.env.VITE_API_DOCS_URL || 'https://sefr-backend.liara.run/api-docs';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+export const API_DOCS_URL = import.meta.env.VITE_API_DOCS_URL || 'http://localhost:3000/api-docs';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -200,7 +200,7 @@ api.interceptors.request.use(
       console.log(`Token added to headers for ${config.method?.toUpperCase()} request`);
     }
     const sessionId = localStorage.getItem('sessionId');
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}, session: ${session ? 'PRESENT' : 'MISSING'}`);
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}, session: ${sessionId ? 'PRESENT' : 'MISSING'}`);
     if (sessionId) {
       config.headers['x-session-id'] = sessionId; // Keep for backward compatibility
       console.log(`Session added to headers for ${config.method?.toUpperCase()} request`);
@@ -474,16 +474,17 @@ export const userAPI = {
 
 // Product API - Updated with standardized response handling
 export const productAPI = {
-  // Product operations
-  getAll: async (): Promise<ApiResponse<any[]>> => {
-    return ApiHelper.get<any[]>('/product/all');
-  },
 
   getCartProducts: async (productIds: string[]): Promise<ApiResponse<any[]>> => {
     return ApiHelper.post<any[]>('/product/cart-products', { productIds });
   },
 
-  getList: async (): Promise<ApiResponse<any>> => {
+  // Product operations
+  getAll: async (): Promise<ApiResponse<any[]>> => {
+    return ApiHelper.get<any[]>('/product/all');
+  },
+
+  getList: async (): Promise<ApiResponse<any[]>> => {
     return ApiHelper.get('/product/list');
   },
 
@@ -733,7 +734,7 @@ export const categoryAPI = {
     return ApiHelper.get(`/category/public-list/${storeId}`);
   },
 
-  list: async (): Promise<ApiResponse<any>> => {
+  list: async (): Promise<ApiResponse<any[]>> => {
     // Authenticated endpoint
     return ApiHelper.post('/category/list', {});
   },

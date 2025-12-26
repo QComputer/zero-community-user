@@ -75,12 +75,18 @@ const EditProductCard: React.FC<EditProductCardProps> = ({
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        console.log('Loading categories for user:', user._id, 'role:', user.role);
-        const _cats = await categoryAPI.list();
-        console.log('Category API response:', _cats);
-        const categoryList = _cats.data || [];
-        console.log('Category list received:', categoryList.length, 'items');
-        // Include both user's own categories and global categories
+        let categoryList;
+        console.log('Loading categories for user:', user?._id, 'role:', user?.role);
+        const response = await categoryAPI.list();
+        if (response.data) {
+        console.log('Category API response:', response);
+
+         categoryList = response.data || [];
+          console.log('Categories loaded:', categoryList.length, 'items');
+          setCategories(categoryList);
+        } else {
+             categoryList =  [];
+        }
         const allCategories = categoryList
           .map((cat: any) => cat.name);
         console.log('Filtered categories:', allCategories);

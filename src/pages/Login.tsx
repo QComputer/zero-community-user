@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 interface LoginProps {
-  onLogin: (userData: User, token: string) => void;
+  onLogin: (userDataOrNull: User | null, tokenOrSessionId: any|null) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
@@ -36,8 +36,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       logUserAction('login', { username: formData.username });
       onLogin(res.data.user, res.data.token);
-      //
-      //localStorage.setItem('user', JSON.stringify(res.data.user));
       toast.success(t('auth.loginSuccess'));
       navigate('/dashboard');
     } catch (error) {
@@ -51,12 +49,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const handleGuestLogin = async () => {
     setLoading(true);
-
     try {
       // isManual = true
       const res: any = await authAPI.guestLogin(true);
-      localStorage.setItem('ssessionId', res.data.sessionId);
-      localStorage.removeItem('token');
+      onLogin(null, res.data.sessionId);
       logUserAction('guest_login', { username: res.data.username });
       toast.success(t('auth.loginSuccess'));
       navigate('/catalogs');

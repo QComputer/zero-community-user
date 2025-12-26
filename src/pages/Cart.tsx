@@ -22,7 +22,7 @@ interface CartProps {
 
 const MyCart: React.FC<CartProps> = ({ user }) => {
   const { t } = useTranslation();
-  const { storeCarts, setStoreCarts, loading,  handleAddToCart, loadCart } = useCart();
+  const { storeCarts, setStoreCarts, loading, handleAddToCart, loadCart } = useCart();
   const [isTakeout, setIsTakeout] = useState(false);
   const [address, setAddress] = useState('');
   const [latitude, setLatitude] = useState(35.6892); // Tehran default
@@ -46,7 +46,7 @@ const MyCart: React.FC<CartProps> = ({ user }) => {
         await cartAPI.updateCart(productId, quantity, catalogId);
       }
       loadCart(); // Refresh cart
-      logUserAction('update_cart', {productId, quantity, userId: user._id });
+      logUserAction('update_cart', { productId, quantity, userId: user._id });
     } catch (error: any) {
       toast.error('Failed to update cart');
     }
@@ -111,12 +111,9 @@ const MyCart: React.FC<CartProps> = ({ user }) => {
     return isTakeout ? 50000 : 0; // Fixed driver fee for takeout orders in IRT
   };
 
-
   const calculateStoreTotal = (storeCart: StoreCart) => {
     return calculateSubtotal(storeCart) + calculateDriverFee();
   };
-
-
 
   const placeOrder = async (storeCart: StoreCart) => {
     try {
@@ -150,7 +147,7 @@ const MyCart: React.FC<CartProps> = ({ user }) => {
           items: orderData.items
         });
       }
-      
+
       toast.success(`Order placed successfully for ${storeCart.storeName || storeCart.storeId}!`);
 
       // Remove this store cart from local state
@@ -174,7 +171,7 @@ const MyCart: React.FC<CartProps> = ({ user }) => {
   const placeGuestOrder = async (storeCart: StoreCart) => {
     try {
       setPlacingOrder(storeCart.storeId);
-      
+
       const orderData = {
         storeId: storeCart.storeId,
         items: storeCart.items.map(item => ({
@@ -224,17 +221,17 @@ const MyCart: React.FC<CartProps> = ({ user }) => {
   }
 
   const hasItems = storeCarts.length > 0;
-const totalItems = storeCarts.reduce((sum, cart) => {
-if (cart.items && Array.isArray(cart.items)) {
-  return sum + cart.items.reduce((catalogSum, item) => catalogSum + item.quantity, 0);
-}
-return sum;
-}, 0);
+  const totalItems = storeCarts.reduce((sum, cart) => {
+    if (cart.items && Array.isArray(cart.items)) {
+      return sum + cart.items.reduce((catalogSum, item) => catalogSum + item.quantity, 0);
+    }
+    return sum;
+  }, 0);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Shopping Cart</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('page.cart.shoppingCart')}</h1>
         <p className="text-muted-foreground mt-2">
           {hasItems ? `${totalItems} item${totalItems !== 1 ? 's' : ''} from ${storeCarts.length} catalog${storeCarts.length !== 1 ? 's' : ''}` : 'Your cart is empty'}
         </p>
@@ -244,7 +241,7 @@ return sum;
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-muted-foreground text-center">
-              <div className="text-lg font-medium mb-2">Your cart is empty</div>
+              <div className="text-lg font-medium mb-2">{t('page.cart.yourCartIsEmpty')}</div>
               <p className="text-sm">Browse catalogs and add products to get started</p>
             </div>
           </CardContent>
@@ -307,9 +304,8 @@ return sum;
                                 }
                                 variant="ghost"
                                 size="sm"
-                                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-none border-0 hover:bg-muted text-sm font-medium ${
-                                  item.quantity === 1 ? 'text-destructive hover:text-destructive' : ''
-                                }`}
+                                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-none border-0 hover:bg-muted text-sm font-medium ${item.quantity === 1 ? 'text-destructive hover:text-destructive' : ''
+                                  }`}
                               >
                                 {item.quantity === 1 ? '×' : '−'}
                               </Button>
